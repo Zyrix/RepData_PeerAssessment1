@@ -1,10 +1,11 @@
 # Reproducible Research: Peer Assessment 1
 
-Load lattice library and set locale to English.
+Load lattice library, set locale to English and options for number printing
 
 ```r
 library(lattice)
 Sys.setlocale("LC_TIME", "C")
+options(scipen = 1, digits = 2)
 ```
 
 ## Loading and preprocessing the data
@@ -18,6 +19,9 @@ if (!file.exists("activity.csv")) {
 
 # read in csv file
 activity <- read.csv("activity.csv")
+
+# second data frame with NA values removed
+activity_complete <- activity[complete.cases(activity),]
 ```
 
 
@@ -26,7 +30,7 @@ Calculate the total number of steps taken per day ignoring missing values.
 
 ```r
 # take sum of steps factorized by date
-steps <- tapply(activity$steps, activity$date, function(x) sum(x, na.rm = TRUE))
+steps <- tapply(activity_complete$steps, activity_complete$date, sum)
 ```
 
 Make a histogram of the total number of steps taken each day.
@@ -38,11 +42,11 @@ hist(steps, xlab = "Number of steps", main = "Histogram")
 ![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
 
 ```r
-steps_mean <- round(mean(steps), digits = 2)
-steps_median <- median(steps)
+steps_mean <- round(mean(steps, na.rm = TRUE), digits = 2)
+steps_median <- median(steps, na.rm = TRUE)
 ```
-Mean of total number of steps taken per day: 9354.23  
-Median of total number of steps taken per day: 10395
+The mean of total number of steps taken per day is 10766.19.  
+The median of total number of steps taken per day is 10765.
 
 
 ## What is the average daily activity pattern?
@@ -65,7 +69,7 @@ axis(1, at = axTicks(1), labels = names(interval_steps[custom_axTicks]))
 # calculate interval with most steps
 max_interval <- names(which(interval_steps == max(interval_steps)))
 ```
-5-minute interval containing maximum number of steps: 835
+In the 5-minute interval 835 the maximum number of steps are taken (206.17).
 
 ## Imputing missing values
 Note that there are a number of days/intervals where there are missing values (coded as NA). The presence of missing days may introduce bias into some calculations or summaries of the data.
@@ -74,7 +78,7 @@ Note that there are a number of days/intervals where there are missing values (c
 ```r
 missing_sum <- sum(is.na(activity))
 ```
-Total number of missing values in the dataset: 2304  
+There are 2304 missing values from the data set.  
   
 The strategy for filling in all of the missing values in the dataset is to take the mean of a 5-minute interval and assign it to a missing value in that interval.
 
@@ -104,10 +108,10 @@ hist(steps_full, xlab = "Number of steps", main = "Histogram")
 steps_full_mean <- round(mean(steps_full), digits = 2)
 steps_full_median <- round(median(steps_full), digits = 2)
 ```
-Mean of total number of steps taken per day: 10766.19  
-Median of total number of steps taken per day: 10766.19
+The mean of total number of steps taken per day is now 10766.19.  
+The median of total number of steps taken per day is now 10766.19.
 
-The mean and median from imputed step counts differ from the mean and median where missing values were removed because less steps got taken into account. Imputing missing values has the impact of increasing the total daily number of steps.
+The mean didn't change while the median differs because now there is data available for days that used not to have any data. Imputing missing values has the impact of increasing the total daily number of daily steps as it fills out days that used to be left out.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
