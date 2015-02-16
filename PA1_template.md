@@ -7,16 +7,15 @@ library(ggplot2)
 Sys.setlocale("LC_TIME", "C")
 ```
 
-```
-## [1] "C"
-```
-
 ## Loading and preprocessing the data
 
 ```r
+# unzip file if it doesn't exist yet
 if (!file.exists("activity.csv")) {
     unzip("activity.zip")
 }
+
+# load the data
 activity <- read.csv("activity.csv")
 ```
 
@@ -24,27 +23,20 @@ activity <- read.csv("activity.csv")
 ## What is mean total number of steps taken per day?
 
 ```r
+# calculate the total number of steps taken per day ignoring missing values
 steps <- tapply(activity$steps, activity$date, function(x) sum(x, na.rm = TRUE))
-hist(steps)
+# make a histogram of the total number of steps taken each day
+hist(steps, xlab = "Number of steps")
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
 
 ```r
-mean(steps)
+steps_mean <- round(mean(steps), digits = 2)
+steps_median <- median(steps)
 ```
-
-```
-## [1] 9354.23
-```
-
-```r
-median(steps)
-```
-
-```
-## [1] 10395
-```
+mean of total number of steps taken per day: 9354.23  
+median of total number of steps taken per day: 10395
 
 
 ## What is the average daily activity pattern?
