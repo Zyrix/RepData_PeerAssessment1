@@ -1,9 +1,9 @@
 # Reproducible Research: Peer Assessment 1
 
-Load ggplot2 library and set locale to English.
+Load lattice library and set locale to English.
 
 ```r
-library(ggplot2)
+library(lattice)
 Sys.setlocale("LC_TIME", "C")
 ```
 
@@ -32,25 +32,7 @@ steps <- tapply(activity$steps, activity$date, function(x) sum(x, na.rm = TRUE))
 Make a histogram of the total number of steps taken each day.
 
 ```r
-hist(steps, xlab = "Number of steps", title = "Histogram")
-```
-
-```
-## Warning in plot.window(xlim, ylim, "", ...): "title" is not a graphical
-## parameter
-```
-
-```
-## Warning in title(main = main, sub = sub, xlab = xlab, ylab = ylab, ...):
-## "title" is not a graphical parameter
-```
-
-```
-## Warning in axis(1, ...): "title" is not a graphical parameter
-```
-
-```
-## Warning in axis(2, ...): "title" is not a graphical parameter
+hist(steps, xlab = "Number of steps", main = "Histogram")
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
@@ -107,52 +89,47 @@ Make a histogram of the total number of steps taken each day.
 
 ```r
 steps_full <- tapply(activity_full$steps, activity_full$date, function(x) sum(x, na.rm = TRUE))
-hist(steps_full, xlab = "Number of steps", title = "Histogram")
-```
-
-```
-## Warning in plot.window(xlim, ylim, "", ...): "title" is not a graphical
-## parameter
-```
-
-```
-## Warning in title(main = main, sub = sub, xlab = xlab, ylab = ylab, ...):
-## "title" is not a graphical parameter
-```
-
-```
-## Warning in axis(1, ...): "title" is not a graphical parameter
-```
-
-```
-## Warning in axis(2, ...): "title" is not a graphical parameter
+hist(steps_full, xlab = "Number of steps", main = "Histogram")
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-8-1.png) 
 
 ```r
-steps_full_mean <- round(mean(steps_full), digits = 2)
-steps_full_median <- median(steps_full)
+stepsfullmean <- mean(steps_full)
+stepsfullmedian <- median(steps_full)
 ```
-mean of total number of steps taken per day: 1.076619\times 10^{4}  
+mean of total number of steps taken per day: 1.0766189\times 10^{4}  
 median of total number of steps taken per day: 1.0766189\times 10^{4}
 
 Yes, they differ from the steps where missing values were removed because less steps get taken into account. Imputing missing values has the impact of increasing the total daily number of steps.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+For this part the dataset with the filled-in missing values is used.  
+  
+Create a new factor variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
 
 ```r
 daytype <- vector("integer")
+
+# loop over all rows and assign daytype either 0 for weekdays or 1 for weekends
 for (i in 1 : nrow(activity_full)) {
     if (is.element(weekdays(as.Date(activity_full$date[i])), c("Saturday", "Sunday"))) {
-        daytype[i] <- 1
-    } else {
         daytype[i] <- 0
+    } else {
+        daytype[i] <- 1
     }
 }
-activity_full$daytype <- factor(daytype, labels = c("weekday", "weekend"))
-qplot(activity_full$interval, activity_full$steps, activity_full, facets = . ~ daytype, geom = "line")
+
+# create factor column daytype in data frame
+activity_full$daytype <- factor(daytype, labels = c("weekend", "weekday"))
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-9-1.png) 
+Make a panel plot containing a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
+
+```r
+xyplot(activity_full$steps ~ activity_full$interval | activity_full$daytype, data = activity_full, xlab = "Interval", ylab = "Number of steps", layout = c(1, 2), type = "l")
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-10-1.png) 
+There is a difference in activity patterns as the number of steps on weekdays are increased in earlier intervals compared to the weekend.
