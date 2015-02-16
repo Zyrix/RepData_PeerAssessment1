@@ -6,7 +6,7 @@ output:
   pdf_document: default
 ---
 
-Set locale to English and load ggplot2 library
+Load ggplot2 library and set locale to English.
 ```{r results = "hide"}
 library(ggplot2)
 Sys.setlocale("LC_TIME", "C")
@@ -30,8 +30,12 @@ Calculate the total number of steps taken per day ignoring missing values.
 ```{r}
 # take sum of steps factorized by date
 steps <- tapply(activity$steps, activity$date, function(x) sum(x, na.rm = TRUE))
-# histogram of the total number of steps taken each day
-hist(steps, xlab = "Number of steps")
+```
+
+Make a histogram of the total number of steps taken each day.
+```{r}
+hist(steps, xlab = "Number of steps", main = "Histogram")
+
 steps_mean <- round(mean(steps), digits = 2)
 steps_median <- median(steps)
 ```
@@ -40,7 +44,7 @@ median of total number of steps taken per day: `r steps_median`
 
 
 ## What is the average daily activity pattern?
-Make a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
+Make a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis).
 ```{r}
 # take mean of steps factorized by interval
 interval_steps <- tapply(activity$steps, activity$interval, function(x) mean(x, na.rm = TRUE))
@@ -50,27 +54,39 @@ max_interval <- names(which(interval_steps == max(interval_steps)))
 5-minute interval containing maximum number of steps: `r max_interval`
 
 ## Imputing missing values
-
-The strategy is to take the mean of a 5-minute interval and assign it to a missing value in that interval.
+Note that there are a number of days/intervals where there are missing values (coded as NA). The presence of missing days may introduce bias into some calculations or summaries of the data.
 
 ```{r}
-sum(is.na(activity))
+missing_sum <- sum(is.na(activity))
+```
+total number of missing values in the dataset: `r missing_sum`  
+  
+The strategy for filling in all of the missing values in the dataset is to take the mean of a 5-minute interval and assign it to a missing value in that interval.
+
+```{r}
+# copy dataset
 activity_full <- activity
-sum(is.na(activity_full))
+
+# loop over all rows and fill in missing values of steps with average of the interval
 for (i in 1 : nrow(activity_full)) {
     if (is.na(activity_full$steps[i])) {
         activity_full$steps[i] <- interval_steps[as.character(activity_full$interval[i])]
     }
 }
-sum(is.na(activity_full))
-
-steps_full <- tapply(activity_full$steps, activity_full$date, function(x) sum(x, na.rm = TRUE))
-hist(steps_full)
-mean(steps_full)
-median(steps_full)
 ```
 
-Yes, they differ because less steps get taken into account. With missing values, there will be less steps for each day.
+Make a histogram of the total number of steps taken each day.
+```{r}
+steps_full <- tapply(activity_full$steps, activity_full$date, function(x) sum(x, na.rm = TRUE))
+hist(steps_full, xlab = "Number of steps", main = "Histogram")
+
+steps_full_mean <- round(mean(steps_full), digits = 2)
+steps_full_median <- median(steps_full)
+```
+mean of total number of steps taken per day: `r steps_full_mean`  
+median of total number of steps taken per day: `r steps_full_median`
+
+Yes, they differ from the steps where missing values were removed because less steps get taken into account. Imputing missing values has the impact of increasing the total daily number of steps.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?

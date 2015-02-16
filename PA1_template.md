@@ -1,6 +1,6 @@
 # Reproducible Research: Peer Assessment 1
 
-Set locale to English and load ggplot2 library
+Load ggplot2 library and set locale to English.
 
 ```r
 library(ggplot2)
@@ -27,11 +27,33 @@ Calculate the total number of steps taken per day ignoring missing values.
 ```r
 # take sum of steps factorized by date
 steps <- tapply(activity$steps, activity$date, function(x) sum(x, na.rm = TRUE))
-# histogram of the total number of steps taken each day
-hist(steps, xlab = "Number of steps")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
+Make a histogram of the total number of steps taken each day.
+
+```r
+hist(steps, xlab = "Number of steps", title = "Histogram")
+```
+
+```
+## Warning in plot.window(xlim, ylim, "", ...): "title" is not a graphical
+## parameter
+```
+
+```
+## Warning in title(main = main, sub = sub, xlab = xlab, ylab = ylab, ...):
+## "title" is not a graphical parameter
+```
+
+```
+## Warning in axis(1, ...): "title" is not a graphical parameter
+```
+
+```
+## Warning in axis(2, ...): "title" is not a graphical parameter
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
 
 ```r
 steps_mean <- round(mean(steps), digits = 2)
@@ -42,7 +64,7 @@ median of total number of steps taken per day: 10395
 
 
 ## What is the average daily activity pattern?
-Make a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
+Make a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis).
 
 ```r
 # take mean of steps factorized by interval
@@ -50,7 +72,7 @@ interval_steps <- tapply(activity$steps, activity$interval, function(x) mean(x, 
 plot(interval_steps, type = "l", xlab = "Interval", ylab = "Number of steps")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
 
 ```r
 max_interval <- names(which(interval_steps == max(interval_steps)))
@@ -58,64 +80,64 @@ max_interval <- names(which(interval_steps == max(interval_steps)))
 5-minute interval containing maximum number of steps: 835
 
 ## Imputing missing values
+Note that there are a number of days/intervals where there are missing values (coded as NA). The presence of missing days may introduce bias into some calculations or summaries of the data.
 
-The strategy is to take the mean of a 5-minute interval and assign it to a missing value in that interval.
+
+```r
+missing_sum <- sum(is.na(activity))
+```
+total number of missing values in the dataset: 2304  
+  
+The strategy for filling in all of the missing values in the dataset is to take the mean of a 5-minute interval and assign it to a missing value in that interval.
 
 
 ```r
-sum(is.na(activity))
-```
-
-```
-## [1] 2304
-```
-
-```r
+# copy dataset
 activity_full <- activity
-sum(is.na(activity_full))
-```
 
-```
-## [1] 2304
-```
-
-```r
+# loop over all rows and fill in missing values of steps with average of the interval
 for (i in 1 : nrow(activity_full)) {
     if (is.na(activity_full$steps[i])) {
         activity_full$steps[i] <- interval_steps[as.character(activity_full$interval[i])]
     }
 }
-sum(is.na(activity_full))
 ```
 
-```
-## [1] 0
-```
+Make a histogram of the total number of steps taken each day.
 
 ```r
 steps_full <- tapply(activity_full$steps, activity_full$date, function(x) sum(x, na.rm = TRUE))
-hist(steps_full)
+hist(steps_full, xlab = "Number of steps", title = "Histogram")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
+```
+## Warning in plot.window(xlim, ylim, "", ...): "title" is not a graphical
+## parameter
+```
+
+```
+## Warning in title(main = main, sub = sub, xlab = xlab, ylab = ylab, ...):
+## "title" is not a graphical parameter
+```
+
+```
+## Warning in axis(1, ...): "title" is not a graphical parameter
+```
+
+```
+## Warning in axis(2, ...): "title" is not a graphical parameter
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-8-1.png) 
 
 ```r
-mean(steps_full)
+steps_full_mean <- round(mean(steps_full), digits = 2)
+steps_full_median <- median(steps_full)
 ```
+mean of total number of steps taken per day: 1.076619\times 10^{4}  
+median of total number of steps taken per day: 1.0766189\times 10^{4}
 
-```
-## [1] 10766.19
-```
-
-```r
-median(steps_full)
-```
-
-```
-## [1] 10766.19
-```
-
-Yes, they differ because less steps get taken into account. With missing values, there will be less steps for each day.
+Yes, they differ from the steps where missing values were removed because less steps get taken into account. Imputing missing values has the impact of increasing the total daily number of steps.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
@@ -133,4 +155,4 @@ activity_full$daytype <- factor(daytype, labels = c("weekday", "weekend"))
 qplot(activity_full$interval, activity_full$steps, activity_full, facets = . ~ daytype, geom = "line")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-6-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-9-1.png) 
