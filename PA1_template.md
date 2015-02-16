@@ -8,6 +8,7 @@ Sys.setlocale("LC_TIME", "C")
 ```
 
 ## Loading and preprocessing the data
+Load the data.
 
 ```r
 # unzip file if it doesn't exist yet
@@ -15,17 +16,18 @@ if (!file.exists("activity.csv")) {
     unzip("activity.zip")
 }
 
-# load the data
+# read in csv file
 activity <- read.csv("activity.csv")
 ```
 
 
 ## What is mean total number of steps taken per day?
+Calculate the total number of steps taken per day ignoring missing values.
 
 ```r
-# calculate the total number of steps taken per day ignoring missing values
+# take sum of steps factorized by date
 steps <- tapply(activity$steps, activity$date, function(x) sum(x, na.rm = TRUE))
-# make a histogram of the total number of steps taken each day
+# histogram of the total number of steps taken each day
 hist(steps, xlab = "Number of steps")
 ```
 
@@ -40,22 +42,20 @@ median of total number of steps taken per day: 10395
 
 
 ## What is the average daily activity pattern?
+Make a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 
 ```r
+# take mean of steps factorized by interval
 interval_steps <- tapply(activity$steps, activity$interval, function(x) mean(x, na.rm = TRUE))
-plot(interval_steps, type = "l")
+plot(interval_steps, type = "l", xlab = "Interval", ylab = "Number of steps")
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
 
 ```r
-names(which(interval_steps == max(interval_steps)))
+max_interval <- names(which(interval_steps == max(interval_steps)))
 ```
-
-```
-## [1] "835"
-```
-
+5-minute interval containing maximum number of steps: 835
 
 ## Imputing missing values
 
