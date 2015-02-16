@@ -41,8 +41,8 @@ hist(steps, xlab = "Number of steps", main = "Histogram")
 steps_mean <- round(mean(steps), digits = 2)
 steps_median <- median(steps)
 ```
-mean of total number of steps taken per day: 9354.23  
-median of total number of steps taken per day: 10395
+Mean of total number of steps taken per day: 9354.23  
+Median of total number of steps taken per day: 10395
 
 
 ## What is the average daily activity pattern?
@@ -51,12 +51,18 @@ Make a time series plot of the 5-minute interval (x-axis) and the average number
 ```r
 # take mean of steps factorized by interval
 interval_steps <- tapply(activity$steps, activity$interval, function(x) mean(x, na.rm = TRUE))
-plot(interval_steps, type = "l", xlab = "Interval", ylab = "Number of steps")
+
+# plot time series of average steps per interval with custom x-axis ticks
+plot(interval_steps, type = "l", xlab = "Interval", xaxt="n", ylab = "Number of steps")
+custom_axTicks <- axTicks(1)
+custom_axTicks[1] <- 1
+axis(1, at = axTicks(1), labels = names(interval_steps[custom_axTicks]))
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
 
 ```r
+# calculate interval with most steps
 max_interval <- names(which(interval_steps == max(interval_steps)))
 ```
 5-minute interval containing maximum number of steps: 835
@@ -68,7 +74,7 @@ Note that there are a number of days/intervals where there are missing values (c
 ```r
 missing_sum <- sum(is.na(activity))
 ```
-total number of missing values in the dataset: 2304  
+Total number of missing values in the dataset: 2304  
   
 The strategy for filling in all of the missing values in the dataset is to take the mean of a 5-minute interval and assign it to a missing value in that interval.
 
@@ -95,13 +101,13 @@ hist(steps_full, xlab = "Number of steps", main = "Histogram")
 ![](PA1_template_files/figure-html/unnamed-chunk-8-1.png) 
 
 ```r
-stepsfullmean <- mean(steps_full)
-stepsfullmedian <- median(steps_full)
+steps_full_mean <- round(mean(steps_full), digits = 2)
+steps_full_median <- round(median(steps_full), digits = 2)
 ```
-mean of total number of steps taken per day: 1.0766189\times 10^{4}  
-median of total number of steps taken per day: 1.0766189\times 10^{4}
+Mean of total number of steps taken per day: 10766.19  
+Median of total number of steps taken per day: 10766.19
 
-Yes, they differ from the steps where missing values were removed because less steps get taken into account. Imputing missing values has the impact of increasing the total daily number of steps.
+The mean and median from imputed step counts differ from the mean and median where missing values were removed because less steps got taken into account. Imputing missing values has the impact of increasing the total daily number of steps.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
@@ -128,8 +134,21 @@ activity_full$daytype <- factor(daytype, labels = c("weekend", "weekday"))
 Make a panel plot containing a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
 
 ```r
-xyplot(activity_full$steps ~ activity_full$interval | activity_full$daytype, data = activity_full, xlab = "Interval", ylab = "Number of steps", layout = c(1, 2), type = "l")
+# create two datasets for weekend and weekday data
+activity_weekend <- subset(activity_full, daytype == "weekend")
+activity_weekday <- subset(activity_full, daytype == "weekday")
+
+# take mean of steps factorized by interval
+interval_steps_weekend <- tapply(activity_weekend$steps, activity_weekend$interval, mean)
+interval_steps_weekday <- tapply(activity_weekday$steps, activity_weekday$interval, mean)
+
+# get maximum average step count of both weekends and weekdays
+max_average_value <- max(c(interval_steps_weekend, interval_steps_weekday))
+
+# draw xyplot factorized by daytype, plotting average steps over interval
+xyplot(steps ~ interval | daytype, data = activity_full, xlab = "Interval", ylab = "Number of steps", layout = c(1, 2), type = "l", ylim = c(0, max_average_value + max_average_value/10), index.cond = list(c(2, 1)), panel = function(x, y, ...) { panel.average(x, y, horizontal = FALSE, col = "blue", ...)})
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-10-1.png) 
-There is a difference in activity patterns as the number of steps on weekdays are increased in earlier intervals compared to the weekend.
+
+There is a difference in activity patterns between weekdays and weekends. The number of steps on weekdays is greater in early and late intervals while the number of steps on the weekends is increased during the day.
